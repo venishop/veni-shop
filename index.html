@@ -373,6 +373,7 @@ header{background:#fffdf7f2;border-bottom-color:#e7ded2}
 #fortune .v28-sub{font-size:12px;color:#9aacca;margin-top:5px;min-height:20px}
 #fortune .v28-save{font-size:12px;padding:7px 12px;margin-top:7px;border:1px solid #b8cee6;background:#fff;color:#7897b8;border-radius:22px;cursor:pointer}
 #fortune .v28-save[hidden]{display:none}
+#fortune .v28-save:disabled{opacity:.7;cursor:progress}
 #fortune .v28-hint{color:#91a5bb;font-size:12px;line-height:1.9;margin:30px auto 0;max-width:700px}
 #fortune .v28-flip:focus-visible,#fortune .v28-save:focus-visible{outline:3px solid #dca3bd;outline-offset:5px}
 @media(max-width:860px){#fortune .v28-gallery{grid-template-columns:repeat(2,minmax(0,194px));gap:26px 15px}}
@@ -386,7 +387,59 @@ header{background:#fffdf7f2;border-bottom-color:#e7ded2}
 #fortune .v28-locked .v28-flip{cursor:default}
 #fortune .v28-actions .btn:disabled{opacity:.62;cursor:not-allowed;box-shadow:none;transform:none}
 @media(max-width:470px){#fortune .v28-gallery{grid-template-columns:repeat(2,minmax(0,194px))}}
-</style></head><body><header><nav><a class="brand" href="#top">Veni Shop <span data-ming="sparkles-fill"></span></a><div class="navlinks"><a href="#fortune">小小祝福</a><a href="#quiz">可愛人格</a><a href="#lab">改造研究所</a><a href="#gacha">扭蛋拼圖</a></div></nav></header><div class="mobile-quick-nav" aria-label="手機快捷導覽"><a href="#top">⌂<span>首頁</span></a><a href="#fortune">♡<span>祝福</span></a><a href="#quiz">✦<span>人格</span></a><a href="#lab">▣<span>拍立得</span></a><a href="#gacha">◉<span>扭蛋</span></a></div><main id="top"><div class="wrap hero"><div class="hero-box"><div class="hero-doodles" aria-hidden="true"><span class="chalk-grid"></span><span class="twinkle t1">✧</span><span class="twinkle t2">✦</span><span class="twinkle t3">✧</span></div><div class="eyebrow">VENI SHOP · A LITTLE HAPPY PLACE</div><h1>把日子過得<br/>可愛一點</h1><p class="lead">收藏小小的快樂，也收藏獨一無二的自己。</p><div class="actions"><a class="btn pink" href="#fortune">抽今日祝福卡 <span data-ming="sparkles-fill"></span></a><a class="btn" href="#quiz">測測可愛人格 <span data-ming="heart-fill"></span></a></div></div></div>
+</style>
+<style id="veni-v28-guided-buttons">
+/* V28｜僅三個最重要的入口做輕柔提示，其餘按鈕保持靜止 */
+@keyframes veniMainHint {
+  0%, 70%, 100% { transform:translateY(0) }
+  77% { transform:translateY(-3px) }
+  84% { transform:translateY(0) }
+  91% { transform:translateY(-1px) }
+  96% { transform:translateY(0) }
+}
+@keyframes veniBackSparkle {
+  0%, 100% { opacity:.6; filter:brightness(1) }
+  50% { opacity:1; filter:brightness(1.3) }
+}
+/* 首頁「抽今日祝福卡」、每日抽卡、扭蛋三處才有微跳提示 */
+.hero-box a.btn.pink,
+#fortune #v28Draw:not(:disabled),
+#gacha #gachaSpin:not(:disabled) {
+  animation:veniMainHint 6.5s ease-in-out infinite;
+}
+.hero-box a.btn.pink { animation-delay:-2s }
+#gacha #gachaSpin:not(:disabled) { animation-delay:-4s }
+/* 尚未翻開的卡片只讓小星星發光，不讓卡片整張跳動 */
+#fortune .v28-item:not(.v28-locked) .v28-back .v28-sparkle {
+  animation:veniBackSparkle 2.6s ease-in-out infinite;
+}
+/* 其他按鈕不持續跳動，只保留操作時的回饋 */
+button.btn:not(:disabled):hover, a.btn:hover,
+#quiz .answer:hover, #lab .sticker-choice:hover,
+#fortune .v28-save:not([hidden]):hover,
+.navlinks a:hover, .mobile-quick-nav a:hover {
+  animation:none; transform:translateY(-2px);
+}
+button.btn:not(:disabled):active, a.btn:active,
+#quiz .answer:active, #lab .sticker-choice:active,
+#fortune .v28-save:not([hidden]):active {
+  animation:none; transform:translateY(1px) scale(.98);
+}
+button.btn:focus-visible, a.btn:focus-visible,
+#quiz .answer:focus-visible, #lab .sticker-choice:focus-visible,
+#fortune .v28-save:focus-visible,
+.navlinks a:focus-visible, .mobile-quick-nav a:focus-visible,
+#gacha .gacha-capsule:focus-visible {
+  outline:3px solid #b990c5; outline-offset:4px; animation:none;
+}
+button:disabled, #fortune .v28-actions .btn:disabled { animation:none!important; cursor:not-allowed }
+@media (prefers-reduced-motion:reduce) {
+  .hero-box a.btn.pink, #fortune #v28Draw:not(:disabled),
+  #gacha #gachaSpin:not(:disabled),
+  #fortune .v28-item .v28-back .v28-sparkle { animation:none!important }
+}
+</style>
+</head><body><header><nav><a class="brand" href="#top">Veni Shop <span data-ming="sparkles-fill"></span></a><div class="navlinks"><a href="#fortune">小小祝福</a><a href="#quiz">可愛人格</a><a href="#lab">改造研究所</a><a href="#gacha">扭蛋拼圖</a></div></nav></header><div class="mobile-quick-nav" aria-label="手機快捷導覽"><a href="#top">⌂<span>首頁</span></a><a href="#fortune">♡<span>祝福</span></a><a href="#quiz">✦<span>人格</span></a><a href="#lab">▣<span>拍立得</span></a><a href="#gacha">◉<span>扭蛋</span></a></div><main id="top"><div class="wrap hero"><div class="hero-box"><div class="hero-doodles" aria-hidden="true"><span class="chalk-grid"></span><span class="twinkle t1">✧</span><span class="twinkle t2">✦</span><span class="twinkle t3">✧</span></div><div class="eyebrow">VENI SHOP · A LITTLE HAPPY PLACE</div><h1>把日子過得<br/>可愛一點</h1><p class="lead">收藏小小的快樂，也收藏獨一無二的自己。</p><div class="actions"><a class="btn pink" href="#fortune">抽今日祝福卡 <span data-ming="sparkles-fill"></span></a><a class="btn" href="#quiz">測測可愛人格 <span data-ming="heart-fill"></span></a></div></div></div>
 <div class="wrap"><div class="welcome-strip"><span class="welcome-mark">01 / A LITTLE JOY</span><span>今天想收藏什麼小快樂？</span></div></div><section id="fortune" class="v28-blessings">
   <div class="wrap">
     <div class="panel v28-fortune-panel">
@@ -399,7 +452,7 @@ header{background:#fffdf7f2;border-bottom-color:#e7ded2}
       </div>
       <p class="v28-status" id="v28Status" role="status" aria-live="polite">點選抽取祝福，再輕點卡片翻開 ♡</p>
       <div class="v28-gallery" id="v28Gallery" aria-label="今天的兩張隨機祝福卡"></div>
-      <p class="v28-hint">每天最多抽 2 張　一般卡與雷射閃卡隨機出現（閃卡基本機率 35%）<br>每累計 3 個有抽卡的日子，至少會遇見 1 張閃卡 ♡<br>126 句祝福抽完才會重新循環　抽卡紀錄保存在這個瀏覽器中，清除資料或更換裝置不會同步</p>
+      <p class="v28-hint">每天最多抽 2 張　一般卡與雷射閃卡隨機出現（閃卡基本機率 35%）<br>每累計 3 個有抽卡的日子，至少會遇見 1 張閃卡 ♡</p>
     </div>
   </div>
 </section>
@@ -522,7 +575,7 @@ const v28Entries=[{"id":1,"type":"normal","theme":0,"text":"今天也值得被�
       if(!saveState()){status.textContent='瀏覽器無法保存抽卡紀錄，請使用一般瀏覽模式';return}
       render();
     });
-    save.addEventListener('click',()=>downloadCard(slot));
+    save.addEventListener('click',()=>{if(slot.entry?.shiny)downloadShinyGif(slot);else downloadCard(slot)});
     slots.push(slot);
   }
   function render(){
@@ -550,6 +603,7 @@ const v28Entries=[{"id":1,"type":"normal","theme":0,"text":"今天也值得被�
       slot.sub.textContent=record.opened?(record.shiny?'閃卡款 ✨':'一般款'):'點擊卡片翻面';
       slot.small.textContent='點我翻開 ♡';
       slot.save.hidden=!record.opened;
+      slot.save.textContent=record.shiny?'↓ 儲存閃卡 GIF ✨':'↓ 下載祝福卡 PNG';
       slot.flip.setAttribute('aria-label',name+(record.opened?' 點擊收起祝福':' 點擊翻開祝福'));
     }
     const n=state.cards.length;
@@ -572,36 +626,230 @@ const v28Entries=[{"id":1,"type":"normal","theme":0,"text":"今天也值得被�
     if(shiny)state.noShinyDays=0;
     return {id:entry.id,theme,shiny,opened:false};
   }
-  function downloadCard(slot){
-    if(!slot.entry)return;
-    const e=slot.entry;
-    const themeColors=[['#f1f7ff','#b3cde8','#6584ac'],['#fff4ee','#efc7b7','#a97c6e'],['#fdf0f8','#e4bdd7','#a47b9d'],['#29355c','#d7c18b','#f8e8b6']];
-    const [bg,line,ink]=themeColors[slot.theme];
-    const c=document.createElement('canvas');c.width=776;c.height=1124;
-    const x=c.getContext('2d');x.scale(4,4);
-    x.fillStyle=bg;x.beginPath();x.roundRect(1,1,192,279,19);x.fill();
-    x.strokeStyle=line;x.lineWidth=2;x.stroke();
-    x.setLineDash([3,3]);x.lineWidth=1;x.beginPath();x.roundRect(9,9,176,263,12);x.stroke();x.setLineDash([]);
-    x.fillStyle=ink;x.textAlign='center';x.font='900 16px "Zen Maru Gothic", sans-serif';x.fillText('Veni Shop ♡',97,34);
-    x.globalAlpha=.7;x.font='22px sans-serif';x.fillText('✧',20,92);x.fillText('♡',176,106);x.globalAlpha=1;
-    const im=new Image();im.onload=()=>{
-      const box={x:7,y:53,w:180,h:127};const scale=Math.min(box.w/im.width,box.h/im.height);
-      const w=im.width*scale,h=im.height*scale;x.drawImage(im,box.x+(box.w-w)/2,box.y+(box.h-h)/2,w,h);
-      if(e.shiny){
-        const g=x.createLinearGradient(12,65,183,225);
-        g.addColorStop(0,'#f5b6df05');g.addColorStop(.28,'#9ed3f730');g.addColorStop(.47,'#fff9e480');g.addColorStop(.63,'#b6c7f060');g.addColorStop(1,'#f5b6df10');
-        x.fillStyle=g;x.beginPath();x.roundRect(4,4,186,273,17);x.fill();
-        x.strokeStyle='#e9a9c7';x.lineWidth=3;x.beginPath();x.roundRect(3,3,188,275,18);x.stroke();
+
+  // 完全離線、無第三方依賴的 GIF89a 動畫編碼：閃卡可以直接下載真正會動的 GIF。
+  // 使用固定 256 色調色盤 + 誤差擴散，避免外部 CDN 在 GitHub Pages 或離線時失效。
+  function veniGifAdaptivePalette(images){
+    // 從整段動畫取樣製作共用的 256 色調色盤，比固定色盤更接近原卡片的粉彩質感。
+    const N=32768,count=new Uint32Array(N),sr=new Uint32Array(N),sg=new Uint32Array(N),sb=new Uint32Array(N);
+    for(const image of images){
+      const data=image.data;
+      for(let i=0;i<data.length;i+=16){
+        if(data[i+3]<128)continue;
+        const r=data[i],g=data[i+1],b=data[i+2];
+        const k=(r>>3)*1024+(g>>3)*32+(b>>3);
+        count[k]++;sr[k]+=r;sg[k]+=g;sb[k]+=b;
       }
-      x.fillStyle=ink;x.font='900 18px "Zen Maru Gothic", sans-serif';
-      const lines=e.lines.map((line,i)=>line+(i===e.lines.length-1?' ♥':''));
-      const baseY=lines.length===1?222:207;
-      lines.forEach((line,i)=>x.fillText(line,97,baseY+i*31,180));
-      x.font='11px "Zen Maru Gothic", sans-serif';x.fillText('A little blessing for you',97,262);
-      saveCanvas(c,'Veni-Shop-V28-No'+String(e.id).padStart(3,'0')+(e.shiny?'-shiny':'')+'.png');
-    };
-    im.onerror=()=>toast('圖片尚未載入，請稍後再下載');
-    im.src=v28Arts[slot.theme];
+    }
+    const colors=[];
+    for(let k=0;k<N;k++)if(count[k])colors.push({r:sr[k]/count[k],g:sg[k]/count[k],b:sb[k]/count[k],n:count[k]});
+    function metrics(items){
+      let rmin=255,rmax=0,gmin=255,gmax=0,bmin=255,bmax=0,n=0;
+      for(const c of items){
+        rmin=Math.min(rmin,c.r);rmax=Math.max(rmax,c.r);
+        gmin=Math.min(gmin,c.g);gmax=Math.max(gmax,c.g);
+        bmin=Math.min(bmin,c.b);bmax=Math.max(bmax,c.b);n+=c.n;
+      }
+      const ranges=[rmax-rmin,gmax-gmin,bmax-bmin],range=Math.max(...ranges);
+      return {items,n,axis:ranges.indexOf(range),score:items.length>1?range*Math.log2(n+2):0};
+    }
+    const boxes=[metrics(colors)];
+    while(boxes.length<255){
+      let best=-1,score=0;
+      for(let i=0;i<boxes.length;i++)if(boxes[i].score>score){score=boxes[i].score;best=i}
+      if(best<0)break;
+      const box=boxes.splice(best,1)[0],axis=['r','g','b'][box.axis];
+      box.items.sort((a,b)=>a[axis]-b[axis]);
+      let half=box.n/2,total=0,split=1;
+      for(let i=0;i<box.items.length-1;i++){
+        total+=box.items[i].n;
+        if(total>=half){split=i+1;break}
+      }
+      boxes.push(metrics(box.items.slice(0,split)),metrics(box.items.slice(split)));
+    }
+    const palette=new Uint8Array(768);
+    for(let i=0;i<boxes.length;i++){
+      let r=0,g=0,b=0,n=0;
+      for(const c of boxes[i].items){r+=c.r*c.n;g+=c.g*c.n;b+=c.b*c.n;n+=c.n}
+      palette[(i+1)*3]=Math.round(r/n);palette[(i+1)*3+1]=Math.round(g/n);palette[(i+1)*3+2]=Math.round(b/n);
+    }
+    for(let i=boxes.length+1;i<256;i++)palette.set(palette.subarray(boxes.length*3,(boxes.length+1)*3),i*3);
+    // 32768 格的色彩查找表讓 GIF 編碼在手機上也能快速完成。
+    const lookup=new Uint8Array(N);
+    for(let k=0;k<N;k++){
+      const r=((k>>10)&31)*8+4,g=((k>>5)&31)*8+4,b=(k&31)*8+4;
+      let best=0,bestDistance=Infinity;
+      for(let j=0;j<boxes.length;j++){
+        const dr=r-palette[(j+1)*3],dg=g-palette[(j+1)*3+1],db=b-palette[(j+1)*3+2];
+        const distance=dr*dr+dg*dg+db*db;
+        if(distance<bestDistance){bestDistance=distance;best=j}
+      }
+      lookup[k]=best+1;
+    }
+    return {palette,lookup};
+  }
+  function veniGifPixels(imageData,lookup){
+    const d=imageData.data,out=new Uint8Array(d.length/4);
+    for(let i=0,j=0;i<d.length;i+=4,j++){
+      out[j]=d[i+3]<128?0:lookup[(d[i]>>3)*1024+(d[i+1]>>3)*32+(d[i+2]>>3)];
+    }
+    return out;
+  }
+  function veniGifLzw(pixels){
+    // GIF LZW codes use little-endian bit packing and 255-byte sub-blocks.
+    const CLEAR=256,END=257,dict=new Map(),data=[];
+    let nextCode=258,codeSize=9,bitBuffer=0,bitCount=0;
+    function write(code){
+      bitBuffer|=code<<bitCount;bitCount+=codeSize;
+      while(bitCount>=8){data.push(bitBuffer&255);bitBuffer>>>=8;bitCount-=8}
+    }
+    write(CLEAR);
+    let prev=pixels[0];
+    for(let i=1;i<pixels.length;i++){
+      const ch=pixels[i],key=prev*256+ch;
+      const found=dict.get(key);
+      if(found!==undefined){prev=found;continue}
+      write(prev);
+      if(nextCode<4096){
+        dict.set(key,nextCode++);
+        // Delay code-size growth by one insertion to match GIF decoder.
+        if(nextCode>(1<<codeSize)&&codeSize<12)codeSize++;
+      }else{
+        write(CLEAR);dict.clear();nextCode=258;codeSize=9;
+      }
+      prev=ch;
+    }
+    write(prev);write(END);
+    if(bitCount>0)data.push(bitBuffer&255);
+    return new Uint8Array(data);
+  }
+  function veniEncodeGif(frames,w,h,delayCs,palette){
+    const pieces=[];
+    const header=new Uint8Array(13+256*3+19);
+    const writeAscii=(off,str)=>{for(let i=0;i<str.length;i++)header[off+i]=str.charCodeAt(i)};
+    writeAscii(0,'GIF89a');header[6]=w&255;header[7]=w>>8;header[8]=h&255;header[9]=h>>8;
+    header[10]=0xf7;header[11]=0;header[12]=0;
+    header.set(palette,13);
+    let off=13+256*3;
+    header.set([0x21,0xff,0x0b],off);off+=3;
+    writeAscii(off,'NETSCAPE2.0');off+=11;
+    header.set([0x03,0x01,0x00,0x00,0x00],off);
+    pieces.push(header);
+    for(const pixels of frames){
+      const imageHeader=new Uint8Array([
+        0x21,0xf9,0x04,0x09,delayCs&255,delayCs>>8,0x00,0x00,
+        0x2c,0,0,0,0,w&255,w>>8,h&255,h>>8,0x00,0x08
+      ]);
+      pieces.push(imageHeader);
+      const compressed=veniGifLzw(pixels);
+      for(let i=0;i<compressed.length;i+=255){
+        const chunk=compressed.subarray(i,i+255);
+        pieces.push(new Uint8Array([chunk.length]));pieces.push(chunk);
+      }
+      pieces.push(new Uint8Array([0]));
+    }
+    pieces.push(new Uint8Array([0x3b]));
+    return new Blob(pieces,{type:'image/gif'});
+  }
+  // 下載圖像直接取用目前卡面的 DOM、實際字體與排版，不再用 Canvas 重新排文字。
+  // 將計算後的 CSS 和原始角色圖片封裝到 SVG foreignObject，再由瀏覽器渲染。
+  // 使用 data: URL 保持 canvas 可讀，且不依賴第三方套件或網路。
+  async function veniCaptureCard(front,phase=0,scale=2){
+    if(document.fonts?.ready)await document.fonts.ready;
+    const width=front.offsetWidth,height=front.offsetHeight,pad=8;
+    const wrapper=document.createElement('div');
+    wrapper.setAttribute('xmlns','http://www.w3.org/1999/xhtml');
+    wrapper.style.cssText=`position:relative;width:${width+pad*2}px;height:${height+pad*2}px;overflow:visible;background:transparent;`;
+    const clone=front.cloneNode(true);
+    function inlineStyles(original,target){
+      const css=getComputedStyle(original);
+      for(let i=0;i<css.length;i++){
+        const name=css[i];target.style.setProperty(name,css.getPropertyValue(name),css.getPropertyPriority(name));
+      }
+      if(original.tagName==='IMG')target.setAttribute('src',original.currentSrc||original.src);
+      const originals=[...original.children],copies=[...target.children];
+      for(let i=0;i<originals.length;i++)inlineStyles(originals[i],copies[i]);
+      for(const [pseudo,prepend] of [['::before',true],['::after',false]]){
+        const style=getComputedStyle(original,pseudo);
+        if(style.content==='none'||style.content==='normal'||style.display==='none')continue;
+        const el=document.createElement('span');
+        for(let i=0;i<style.length;i++){
+          const name=style[i];el.style.setProperty(name,style.getPropertyValue(name),style.getPropertyPriority(name));
+        }
+        const content=style.content;
+        if(content.startsWith('"')&&content.endsWith('"'))el.textContent=content.slice(1,-1);
+        el.style.animation='none';
+        if(pseudo==='::after'&&original.classList.contains('v28-shiny')){
+          // 同一條 CSS 彩虹掃光，只固定不同影格的掃光位置。
+          el.style.transform=`translateX(${-48+96*phase}%) rotate(13deg)`;
+        }
+        if(prepend)target.insertBefore(el,target.firstChild);else target.appendChild(el);
+      }
+    }
+    inlineStyles(front,clone);
+    clone.style.position='absolute';clone.style.left=pad+'px';clone.style.top=pad+'px';
+    clone.style.transform='none';clone.style.backfaceVisibility='visible';clone.style.webkitBackfaceVisibility='visible';
+    clone.style.animation='none';clone.style.width=width+'px';clone.style.height=height+'px';
+    wrapper.appendChild(clone);
+    const w=width+pad*2,h=height+pad*2;
+    const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><foreignObject width="100%" height="100%">${new XMLSerializer().serializeToString(wrapper)}</foreignObject></svg>`;
+    const image=new Image();
+    // 不能改成 blob: URL，否則部分瀏覽器會因安全限制無法擷取像素。
+    image.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+    await image.decode();
+    const canvas=document.createElement('canvas');canvas.width=w*scale;canvas.height=h*scale;
+    const context=canvas.getContext('2d',{willReadFrequently:true});
+    context.drawImage(image,0,0,canvas.width,canvas.height);
+    context.getImageData(0,0,1,1);
+    return canvas;
+  }
+  let veniGifBusy=false;
+  async function downloadShinyGif(slot){
+    if(!slot.entry?.shiny||veniGifBusy)return;
+    veniGifBusy=true;
+    const button=slot.save,original=button.textContent;
+    button.disabled=true;button.textContent='✨ 正在擷取原版卡面…';
+    try{
+      const images=[],count=12;
+      for(let i=0;i<count;i++){
+        button.textContent=`✨ 製作 GIF ${i+1}/${count}`;
+        await new Promise(resolve=>setTimeout(resolve,0));
+        // 先往右掃，再往左掃，對應網頁原本的往返雷射光。
+        const phase=(1-Math.cos(2*Math.PI*i/count))/2;
+        const frame=await veniCaptureCard(slot.front,phase,2);
+        const ctx=frame.getContext('2d',{willReadFrequently:true});
+        images.push(ctx.getImageData(0,0,frame.width,frame.height));
+      }
+      button.textContent='✨ 正在整理 GIF 色彩…';
+      await new Promise(resolve=>setTimeout(resolve,0));
+      const {palette,lookup}=veniGifAdaptivePalette(images);
+      const frames=images.map(image=>veniGifPixels(image,lookup));
+      const w=slot.front.offsetWidth*2+32,h=slot.front.offsetHeight*2+32;
+      const gif=veniEncodeGif(frames,w,h,30,palette);
+      const url=URL.createObjectURL(gif),a=document.createElement('a');
+      a.href=url;a.download='Veni-Shop-No'+String(slot.entry.id).padStart(3,'0')+'-閃卡.gif';
+      document.body.appendChild(a);a.click();a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),10000);
+      toast('閃卡 GIF 已儲存，字體與卡面直接取自網頁 ♡');
+    }catch(err){
+      console.error('GIF export failed',err);
+      toast('GIF 製作失敗，建議使用最新版 Chrome 或 Edge');
+    }finally{
+      button.disabled=false;button.textContent=original;veniGifBusy=false;
+    }
+  }
+  async function downloadCard(slot){
+    if(!slot.entry)return;
+    const button=slot.save,original=button.textContent;
+    button.disabled=true;button.textContent='正在擷取卡面…';
+    try{
+      const canvas=await veniCaptureCard(slot.front,0,4);
+      saveCanvas(canvas,'Veni-Shop-V28-No'+String(slot.entry.id).padStart(3,'0')+'.png');
+      toast('已下載與網頁相同排版的祝福卡 ♡');
+    }catch(err){
+      console.error('PNG export failed',err);
+      toast('圖片製作失敗，建議使用最新版 Chrome 或 Edge');
+    }finally{button.disabled=false;button.textContent=original}
   }
 
   for(let i=0;i<MAX_DAILY;i++)makeCard(i);
