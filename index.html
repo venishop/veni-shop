@@ -765,15 +765,19 @@ const v28Entries=[{"id":1,"type":"normal","theme":0,"text":"今天也值得被�
     pieces.push(new Uint8Array([0x3b]));
     return new Blob(pieces,{type:'image/gif'});
   }
+  // V28 artwork duplication fix: export text/borders from DOM, draw each original character ONCE.
   // 下載圖像直接取用目前卡面的 DOM、實際字體與排版，不再用 Canvas 重新排文字。
   // 將計算後的 CSS 和原始角色圖片封裝到 SVG foreignObject，再由瀏覽器渲染。
   // 使用 data: URL 保持 canvas 可讀，且不依賴第三方套件或網路。
   async function veniCaptureCard(front,phase=0,scale=2){
     if(document.fonts?.ready)await document.fonts.ready;
-    const width=front.offsetWidth,height=front.offsetHeight,pad=8;
+    const width=front.offsetWidth,height=front.offsetHeight,pad=14;
     const wrapper=document.createElement('div');
     wrapper.setAttribute('xmlns','http://www.w3.org/1999/xhtml');
-    wrapper.style.cssText=`position:relative;width:${width+pad*2}px;height:${height+pad*2}px;overflow:visible;background:transparent;`;
+    // Keep the cloned card inside real wrapper padding. iOS/SVG foreignObject may
+    // ignore left/top on absolutely positioned cloned faces, shifting the frame
+    // while the separately painted artwork stays at the expected coordinates.
+    wrapper.style.cssText=`position:relative;box-sizing:border-box;width:${width+pad*2}px;height:${height+pad*2}px;padding:${pad}px;overflow:visible;background:transparent;`;
     const clone=front.cloneNode(true);
     function inlineStyles(original,target){
       const css=getComputedStyle(original);
@@ -781,20 +785,11 @@ const v28Entries=[{"id":1,"type":"normal","theme":0,"text":"今天也值得被�
         const name=css[i];target.style.setProperty(name,css.getPropertyValue(name),css.getPropertyPriority(name));
       }
       if(original.tagName==='IMG')target.setAttribute('src',original.currentSrc||original.src);
-      // IMPORTANT: Safari/WebKit may silently omit CSS background-image inside
-      // SVG foreignObject. Render original artwork as an explicit embedded IMG
-      // ONLY in the export clone, preserving the same contain sizing and position.
+      // Export the artwork in ONE deterministic canvas pass below.
+      // Do not keep a CSS background or append an IMG to the SVG clone:
+      // drawing both the clone IMG and the canvas fallback duplicated the bear.
       if(original.classList?.contains('v28-art')){
-        const artUrl=(original.style.backgroundImage||css.backgroundImage).match(/url\([\"']?(.*?)[\"']?\)$/)?.[1];
-        if(artUrl){
-          target.style.setProperty('background-image','none','important');
-          target.style.setProperty('position','relative');
-          const artImg=document.createElement('img');
-          artImg.setAttribute('src',artUrl);
-          artImg.setAttribute('alt','');
-          artImg.style.cssText='display:block!important;position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:contain!important;pointer-events:none!important;opacity:1!important;visibility:visible!important;';
-          target.appendChild(artImg);
-        }
+        target.style.setProperty('background-image','none','important');
       }
       const originals=[...original.children],copies=[...target.children];
       for(let i=0;i<originals.length;i++)inlineStyles(originals[i],copies[i]);
@@ -816,8 +811,13 @@ const v28Entries=[{"id":1,"type":"normal","theme":0,"text":"今天也值得被�
       }
     }
     inlineStyles(front,clone);
-    clone.style.position='absolute';clone.style.left=pad+'px';clone.style.top=pad+'px';
-    clone.style.transform='none';clone.style.backfaceVisibility='visible';clone.style.webkitBackfaceVisibility='visible';
+    clone.style.position='relative';clone.style.inset='auto';
+    clone.style.left='auto';clone.style.top='auto';clone.style.right='auto';clone.style.bottom='auto';
+    clone.style.margin='0';clone.style.transform='none';
+    // Export transparent margins cleanly: Chromium SVG foreignObject can
+    // rasterize the normal card shadow as an oversized dark halo.
+    if(!front.classList.contains('v28-shiny'))clone.style.boxShadow='none';
+    clone.style.backfaceVisibility='visible';clone.style.webkitBackfaceVisibility='visible';
     clone.style.animation='none';clone.style.width=width+'px';clone.style.height=height+'px';
     wrapper.appendChild(clone);
     const w=width+pad*2,h=height+pad*2;
@@ -829,9 +829,8 @@ const v28Entries=[{"id":1,"type":"normal","theme":0,"text":"今天也值得被�
     const canvas=document.createElement('canvas');canvas.width=w*scale;canvas.height=h*scale;
     const context=canvas.getContext('2d',{willReadFrequently:true});
     context.drawImage(image,0,0,canvas.width,canvas.height);
-    // Robust artwork pass: iOS in-app browsers sometimes omit embedded images
-    // from foreignObject. Paint the SAME original art onto the final card canvas
-    // at its exact layout coordinates so a saved GIF never loses the character.
+    // Single artwork pass: paint the original character exactly once on canvas.
+    // Works even when iOS in-app browsers omit CSS backgrounds in foreignObject.
     const originalArt=front.querySelector('.v28-art');
     if(originalArt){
       const artSrc=(originalArt.style.backgroundImage||getComputedStyle(originalArt).backgroundImage).match(/url\([\"']?(.*?)[\"']?\)$/)?.[1];
@@ -841,8 +840,10 @@ const v28Entries=[{"id":1,"type":"normal","theme":0,"text":"今天也值得被�
         const aw=originalArt.offsetWidth,ah=originalArt.offsetHeight;
         const aspect=Math.min(aw/artImage.naturalWidth,ah/artImage.naturalHeight);
         const drawW=artImage.naturalWidth*aspect,drawH=artImage.naturalHeight*aspect;
-        const x=(pad+originalArt.offsetLeft+(aw-drawW)/2)*scale;
-        const y=(pad+originalArt.offsetTop+(ah-drawH)/2)*scale;
+        // offsetLeft/Top are layout coordinates, unaffected by 3D card flips.
+        // getBoundingClientRect() can be mirrored by rotateY(180deg).
+        const x=(pad+front.clientLeft+originalArt.offsetLeft+(aw-drawW)/2)*scale;
+        const y=(pad+front.clientTop+originalArt.offsetTop+(ah-drawH)/2)*scale;
         context.drawImage(artImage,x,y,drawW*scale,drawH*scale);
       }
     }
@@ -892,7 +893,7 @@ const v28Entries=[{"id":1,"type":"normal","theme":0,"text":"今天也值得被�
         await new Promise(resolve=>setTimeout(resolve,0));
         // 先往右掃，再往左掃，對應網頁原本的往返雷射光。
         const phase=(1-Math.cos(2*Math.PI*i/count))/2;
-        const frame=await veniCaptureCard(slot.front,phase,2);
+        const frame=await veniCaptureCard(slot.front,phase,3);
         const ctx=frame.getContext('2d',{willReadFrequently:true});
         images.push(ctx.getImageData(0,0,frame.width,frame.height));
       }
@@ -900,7 +901,7 @@ const v28Entries=[{"id":1,"type":"normal","theme":0,"text":"今天也值得被�
       await new Promise(resolve=>setTimeout(resolve,0));
       const {palette,lookup}=veniGifAdaptivePalette(images);
       const frames=images.map(image=>veniGifPixels(image,lookup));
-      const w=slot.front.offsetWidth*2+32,h=slot.front.offsetHeight*2+32;
+      const w=(slot.front.offsetWidth+28)*3,h=(slot.front.offsetHeight+28)*3;
       const gif=veniEncodeGif(frames,w,h,30,palette);
       await veniOfferCompleteCard(gif,'Veni-Shop-No'+String(slot.entry.id).padStart(3,'0')+'-完整閃卡.gif','image/gif');
     }catch(err){
@@ -916,7 +917,7 @@ const v28Entries=[{"id":1,"type":"normal","theme":0,"text":"今天也值得被�
     const button=slot.save,original=button.textContent;
     button.disabled=true;button.textContent='正在擷取卡面…';
     try{
-      const canvas=await veniCaptureCard(slot.front,0,4);
+      const canvas=await veniCaptureCard(slot.front,0,3);
       const blob=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(Error('PNG export failed')),'image/png'));
       await veniOfferCompleteCard(blob,'Veni-Shop-V28-No'+String(slot.entry.id).padStart(3,'0')+'-完整卡面.png','image/png');
     }catch(err){
