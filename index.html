@@ -208,6 +208,18 @@ header{background:#fffdf7f2;border-bottom-color:#e7ded2}
 @keyframes veniHeroShine{0%,100%{opacity:.4;transform:scale(.85)}50%{opacity:1;transform:scale(1.15)}}
 @media(max-width:740px){.hero-box .hero-doodles{top:7px;right:8px;width:96px;height:80px;opacity:.55}.hero-box .hero-doodles .chalk-grid{width:58px;height:44px;right:22px;top:4px}.hero-box .hero-doodles .twinkle{font-size:15px}.hero-box .hero-doodles .t1{right:2px;top:4px}.hero-box .hero-doodles .t2{right:3px;top:44px}.hero-box .hero-doodles .t3{right:55px;top:55px}.hero-box .hero-doodles .t4{right:39px;top:24px}}
 @media(prefers-reduced-motion:reduce){.hero-box .hero-doodles .twinkle{animation:none;opacity:.8}}
+
+/* Original artwork is presented as a non-selectable card layer, not as a long-pressable image. */
+#fortune .v28-art{background-repeat:no-repeat;background-position:center;background-size:contain;pointer-events:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+#fortune .v28-scene,#fortune .v28-front,#fortune .v28-back,#fortune .v28-flip{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+#fortune .v28-art img{display:none}
+.veni-save-dialog{position:fixed;inset:0;z-index:9999;background:#182438ba;display:flex;align-items:center;justify-content:center;padding:16px}
+.veni-save-dialog[hidden]{display:none}
+.veni-save-panel{max-height:94vh;overflow:auto;width:min(100%,440px);padding:16px;background:#fffaf6;border-radius:20px;box-shadow:0 12px 45px #0003;text-align:center;color:#66839c;font:700 14px/1.6 sans-serif}
+.veni-save-panel img{display:block;width:min(100%,270px);max-height:55vh;object-fit:contain;margin:12px auto;border-radius:16px;-webkit-touch-callout:default;user-select:auto}
+.veni-save-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:10px 0}
+.veni-save-actions button,.veni-save-actions a{padding:10px 13px;border-radius:24px;background:#e2efff;border:1px solid #b7cfe7;color:#587b9f;text-decoration:none;font:700 13px sans-serif}
+.veni-save-panel p{margin:8px 0;font-weight:500}
 </style><style>
 /* V26: simplified quiz: one white intro card, enlarged choices, no decorative side panel */
 #quiz{background:linear-gradient(145deg,#eaf3f7,#f7faf9 55%,#e8f0f5)}
@@ -558,7 +570,7 @@ const v28Entries=[{"id":1,"type":"normal","theme":0,"text":"今天也值得被�
     back.append(sp,symbol,brand,small);
     const front=document.createElement('div');front.className='v28-face v28-card v28-front';
     const top=document.createElement('div');top.className='v28-top';top.textContent='Veni Shop ♡';
-    const art=document.createElement('img');art.className='v28-art';art.src=v28Arts[0];art.alt='原創角色';
+    const art=document.createElement('div');art.className='v28-art';art.style.backgroundImage='url('+v28Arts[0]+')';art.setAttribute('role','img');art.setAttribute('aria-label','Veni Shop 原創角色');
     const msg=document.createElement('div');msg.className='v28-message';
     const foot=document.createElement('div');foot.className='v28-foot';foot.textContent='A little blessing for you';
     for(const [cls,txt] of [['v28-dec v28-d1','✧'],['v28-dec v28-d2','♡']]){const el=document.createElement('span');el.className=cls;el.textContent=txt;front.append(el)}
@@ -568,6 +580,8 @@ const v28Entries=[{"id":1,"type":"normal","theme":0,"text":"今天也值得被�
     const save=document.createElement('button');save.type='button';save.className='v28-save';save.textContent='↓ 下載這張祝福卡';save.hidden=true;
     item.append(scene,label,sub,save);gallery.append(item);
     const slot={index,item,flip,front,art,msg,label,sub,save,small,entry:null,theme:0};
+    flip.addEventListener('contextmenu',event=>event.preventDefault());
+    flip.addEventListener('dragstart',event=>event.preventDefault());
     flip.addEventListener('click',()=>{
       const record=state.cards[index];
       if(!record){status.textContent='先點選「抽取今天的祝福」，每天最多兩張 ♡';return}
@@ -595,7 +609,7 @@ const v28Entries=[{"id":1,"type":"normal","theme":0,"text":"今天也值得被�
       slot.theme=record.theme;
       slot.entry={...entry,shiny:record.shiny};
       slot.item.className='v28-item v28-'+cls;
-      slot.art.src=v28Arts[record.theme];slot.art.alt=name;
+      slot.art.style.backgroundImage='url('+v28Arts[record.theme]+')';slot.art.setAttribute('aria-label',name+'原創角色');
       slot.front.classList.toggle('v28-shiny',record.shiny);
       slot.msg.replaceChildren();
       entry.lines.forEach((line,i)=>{const span=document.createElement('span');span.textContent=line+(i===entry.lines.length-1?' ♥':'');slot.msg.append(span)});
@@ -603,7 +617,7 @@ const v28Entries=[{"id":1,"type":"normal","theme":0,"text":"今天也值得被�
       slot.sub.textContent=record.opened?(record.shiny?'閃卡款 ✨':'一般款'):'點擊卡片翻面';
       slot.small.textContent='點我翻開 ♡';
       slot.save.hidden=!record.opened;
-      slot.save.textContent=record.shiny?'↓ 儲存閃卡 GIF ✨':'↓ 下載祝福卡 PNG';
+      slot.save.textContent=record.shiny?'↗ 分享完整閃卡 GIF ✨':'↗ 儲存完整祝福卡';
       slot.flip.setAttribute('aria-label',name+(record.opened?' 點擊收起祝福':' 點擊翻開祝福'));
     }
     const n=state.cards.length;
@@ -767,6 +781,21 @@ const v28Entries=[{"id":1,"type":"normal","theme":0,"text":"今天也值得被�
         const name=css[i];target.style.setProperty(name,css.getPropertyValue(name),css.getPropertyPriority(name));
       }
       if(original.tagName==='IMG')target.setAttribute('src',original.currentSrc||original.src);
+      // IMPORTANT: Safari/WebKit may silently omit CSS background-image inside
+      // SVG foreignObject. Render original artwork as an explicit embedded IMG
+      // ONLY in the export clone, preserving the same contain sizing and position.
+      if(original.classList?.contains('v28-art')){
+        const artUrl=(original.style.backgroundImage||css.backgroundImage).match(/url\([\"']?(.*?)[\"']?\)$/)?.[1];
+        if(artUrl){
+          target.style.setProperty('background-image','none','important');
+          target.style.setProperty('position','relative');
+          const artImg=document.createElement('img');
+          artImg.setAttribute('src',artUrl);
+          artImg.setAttribute('alt','');
+          artImg.style.cssText='display:block!important;position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:contain!important;pointer-events:none!important;opacity:1!important;visibility:visible!important;';
+          target.appendChild(artImg);
+        }
+      }
       const originals=[...original.children],copies=[...target.children];
       for(let i=0;i<originals.length;i++)inlineStyles(originals[i],copies[i]);
       for(const [pseudo,prepend] of [['::before',true],['::after',false]]){
@@ -800,8 +829,55 @@ const v28Entries=[{"id":1,"type":"normal","theme":0,"text":"今天也值得被�
     const canvas=document.createElement('canvas');canvas.width=w*scale;canvas.height=h*scale;
     const context=canvas.getContext('2d',{willReadFrequently:true});
     context.drawImage(image,0,0,canvas.width,canvas.height);
+    // Robust artwork pass: iOS in-app browsers sometimes omit embedded images
+    // from foreignObject. Paint the SAME original art onto the final card canvas
+    // at its exact layout coordinates so a saved GIF never loses the character.
+    const originalArt=front.querySelector('.v28-art');
+    if(originalArt){
+      const artSrc=(originalArt.style.backgroundImage||getComputedStyle(originalArt).backgroundImage).match(/url\([\"']?(.*?)[\"']?\)$/)?.[1];
+      if(artSrc){
+        const artImage=new Image();artImage.src=artSrc;
+        await artImage.decode();
+        const aw=originalArt.offsetWidth,ah=originalArt.offsetHeight;
+        const aspect=Math.min(aw/artImage.naturalWidth,ah/artImage.naturalHeight);
+        const drawW=artImage.naturalWidth*aspect,drawH=artImage.naturalHeight*aspect;
+        const x=(pad+originalArt.offsetLeft+(aw-drawW)/2)*scale;
+        const y=(pad+originalArt.offsetTop+(ah-drawH)/2)*scale;
+        context.drawImage(artImage,x,y,drawW*scale,drawH*scale);
+      }
+    }
     context.getImageData(0,0,1,1);
     return canvas;
+  }
+  // iPhone Safari and in-app browsers cannot silently write to Photos.
+  // Prefer the native share sheet; otherwise present the COMPLETE card for saving.
+  const veniDialog=document.createElement('div');
+  veniDialog.className='veni-save-dialog';veniDialog.hidden=true;
+  veniDialog.innerHTML='<div class="veni-save-panel" role="dialog" aria-modal="true" aria-label="儲存完整祝福卡"><strong>♡ 儲存完整祝福卡</strong><p class="veni-save-instruction"></p><img alt="包含原創角色、祝福文字與卡框的完整祝福卡"><div class="veni-save-actions"><button type="button" class="veni-share-again">分享至相簿</button><a class="veni-download-direct" download>下載完整卡面</a><button type="button" class="veni-close-save">關閉</button></div><p>iPhone：點「分享至相簿」後選擇「儲存影像」；若 Messenger 沒有這個選項，請用 Safari 開啟網頁。</p></div>';
+  document.body.appendChild(veniDialog);
+  let veniPreviewUrl=null,veniPreviewFile=null;
+  function veniClosePreview(){veniDialog.hidden=true;if(veniPreviewUrl){URL.revokeObjectURL(veniPreviewUrl);veniPreviewUrl=null}veniPreviewFile=null}
+  veniDialog.querySelector('.veni-close-save').addEventListener('click',veniClosePreview);
+  veniDialog.addEventListener('click',e=>{if(e.target===veniDialog)veniClosePreview()});
+  veniDialog.querySelector('.veni-share-again').addEventListener('click',async()=>{
+    if(!veniPreviewFile)return;
+    if(navigator.share&&navigator.canShare?.({files:[veniPreviewFile]})){
+      try{await navigator.share({files:[veniPreviewFile],title:'Veni Shop 完整祝福卡'});return}catch(e){if(e.name==='AbortError')return}
+    }
+    veniDialog.querySelector('.veni-save-instruction').textContent='目前瀏覽器不支援直接分享到相簿，請長按下方完整卡面儲存，或點「下載完整卡面」後到「檔案」App 開啟並分享至照片。';
+  });
+  async function veniOfferCompleteCard(blob,name,mime){
+    const file=new File([blob],name,{type:mime});
+    if(navigator.share&&navigator.canShare?.({files:[file]})){
+      try{await navigator.share({files:[file],title:'Veni Shop 完整祝福卡'});return}catch(e){if(e.name==='AbortError')return}
+    }
+    if(veniPreviewUrl)URL.revokeObjectURL(veniPreviewUrl);
+    veniPreviewUrl=URL.createObjectURL(blob);veniPreviewFile=file;
+    veniDialog.querySelector('img').src=veniPreviewUrl;
+    veniDialog.querySelector('.veni-download-direct').href=veniPreviewUrl;
+    veniDialog.querySelector('.veni-download-direct').download=name;
+    veniDialog.querySelector('.veni-save-instruction').textContent=mime==='image/gif'?'這是包含原創角色的完整閃卡 GIF。iPhone 可長按下方整張卡片嘗試儲存，或下載至「檔案」再分享至「照片」。':'這是完整祝福卡 PNG。可長按整張卡片儲存，或使用分享選單加入照片。';
+    veniDialog.hidden=false;
   }
   let veniGifBusy=false;
   async function downloadShinyGif(slot){
@@ -826,14 +902,11 @@ const v28Entries=[{"id":1,"type":"normal","theme":0,"text":"今天也值得被�
       const frames=images.map(image=>veniGifPixels(image,lookup));
       const w=slot.front.offsetWidth*2+32,h=slot.front.offsetHeight*2+32;
       const gif=veniEncodeGif(frames,w,h,30,palette);
-      const url=URL.createObjectURL(gif),a=document.createElement('a');
-      a.href=url;a.download='Veni-Shop-No'+String(slot.entry.id).padStart(3,'0')+'-閃卡.gif';
-      document.body.appendChild(a);a.click();a.remove();
-      setTimeout(()=>URL.revokeObjectURL(url),10000);
-      toast('閃卡 GIF 已儲存，字體與卡面直接取自網頁 ♡');
+      await veniOfferCompleteCard(gif,'Veni-Shop-No'+String(slot.entry.id).padStart(3,'0')+'-完整閃卡.gif','image/gif');
     }catch(err){
       console.error('GIF export failed',err);
-      toast('GIF 製作失敗，建議使用最新版 Chrome 或 Edge');
+      toast('此瀏覽器無法製作 GIF，改為提供完整卡面 PNG');
+      try{const still=await veniCaptureCard(slot.front,0.5,3);await new Promise((resolve,reject)=>still.toBlob(async blob=>{if(!blob){reject(Error('PNG error'));return}try{await veniOfferCompleteCard(blob,'Veni-Shop-完整閃卡.png','image/png');resolve()}catch(e){reject(e)}},'image/png'))}catch(e){console.error('PNG fallback failed',e)}
     }finally{
       button.disabled=false;button.textContent=original;veniGifBusy=false;
     }
@@ -844,8 +917,8 @@ const v28Entries=[{"id":1,"type":"normal","theme":0,"text":"今天也值得被�
     button.disabled=true;button.textContent='正在擷取卡面…';
     try{
       const canvas=await veniCaptureCard(slot.front,0,4);
-      saveCanvas(canvas,'Veni-Shop-V28-No'+String(slot.entry.id).padStart(3,'0')+'.png');
-      toast('已下載與網頁相同排版的祝福卡 ♡');
+      const blob=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(Error('PNG export failed')),'image/png'));
+      await veniOfferCompleteCard(blob,'Veni-Shop-V28-No'+String(slot.entry.id).padStart(3,'0')+'-完整卡面.png','image/png');
     }catch(err){
       console.error('PNG export failed',err);
       toast('圖片製作失敗，建議使用最新版 Chrome 或 Edge');
