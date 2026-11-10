@@ -634,7 +634,12 @@ const v28Entries=[{"id":1,"type":"normal","theme":0,"text":"今天也值得被�
     let available=v28Entries.filter(e=>!used.has(e.id));
     if(!available.length){state.usedIds=[];available=v28Entries}
     const entry=available[Math.floor(Math.random()*available.length)];
-    const theme=Math.floor(Math.random()*themes.length);
+    // 每日兩抽的角色不重複：第二抽只會從當天尚未出現的角色中隨機挑選。
+    // 祝福語、閃卡機率與每日抽卡次數均維持原本規則。
+    const drawnThemes=new Set(state.cards.map(card=>card.theme));
+    const remainingThemes=themes.map((_,index)=>index).filter(index=>!drawnThemes.has(index));
+    const themePool=remainingThemes.length?remainingThemes:themes.map((_,index)=>index);
+    const theme=themePool[Math.floor(Math.random()*themePool.length)];
     const shiny=(state.noShinyDays>=2&&!state.cards.some(c=>c.shiny))||Math.random()<SHINY_CHANCE;
     state.usedIds.push(entry.id);
     if(shiny)state.noShinyDays=0;
